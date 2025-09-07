@@ -28,14 +28,15 @@ def gap(a: datetime, b: datetime) -> int:
     return max(0, int(delta.total_seconds() // 60))
 
 def choose_shift(first_in: datetime, last_out: datetime) -> str:
-    best_id, best_cost = None, float("inf")
+    best_id, best_diff = None, float("inf")
     for s in SHIFTS:
         s_start = datetime.combine(first_in.date(), s.start)
-        s_end = s_start + timedelta(hours=9)
-        cost = gap(first_in, s_start) + gap(last_out, s_end)
-        if cost < best_cost:
-            best_id, best_cost = s.id, cost
+        # Difference in minutes between actual time_in and shift start
+        diff = abs((first_in - s_start).total_seconds()) // 60
+        if diff < best_diff:
+            best_id, best_diff = s.id, diff
     return best_id
+
 
 def parse_attendance(attendance_str, date_str):
     if pd.isna(attendance_str) or attendance_str is None:
