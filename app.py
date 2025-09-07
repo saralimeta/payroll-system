@@ -143,14 +143,18 @@ if generate:
     # --- map attendance ---
     try:
         days = report.iloc[2, 0:].dropna().tolist()
-        day_to_date = {i+1: d.strftime("%Y-%m-%d") for i, d in enumerate(date_range)}
+
+        # Map by actual day-of-month, not position
+        day_to_date = {d.day: d.strftime("%Y-%m-%d") for d in date_range}
+
         for i, emp_id in enumerate(employee_ids):
             attendance_row = 4 + (i * 2)
             vals = report.iloc[attendance_row, 0:len(days)]
             for j, day_number in enumerate(days):
-                if pd.notna(day_number) and day_number in day_to_date:
-                    date_str = day_to_date[day_number]
+                if pd.notna(day_number) and int(day_number) in day_to_date:
+                    date_str = day_to_date[int(day_number)]
                     attendance_data[emp_id]["dates"][date_str]["attendance"] = vals.iloc[j]
+
     except Exception as e:
         st.error(f"Failed to populate attendance values: {e}")
         st.stop()
